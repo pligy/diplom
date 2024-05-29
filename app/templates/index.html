@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find a companion</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="../static/styles.css">
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Find a companion</h1>
+    <label for="destination">Your destination:</label><br>
+    <input type="text" id="destination" name="destination" required><br>
+    <button type="submit" onclick="getLocationAndSave()">Share location</button>
+    <p id="location"></p>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script>
+        var map = L.map('map').setView([55.7422, 37.5719], 11); // Set initial coordinates and zoom level
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        function addMarker(location) {
+            L.marker([location.latitude, location.longitude]).addTo(map)
+            .bindPopup("<b>Написать</b>") // Здесь добавляется HTML-код для всплывающего окна
+            .openPopup(); // Открытие всплывающего окна автоматически при добавлении маркера;
+        }
+
+        function addRoute(start, end) {
+            L.Routing.control({
+                waypoints: [
+                    L.latLng(start.latitude, start.longitude),
+                    L.latLng(end.latitude, end.longitude)
+                ],
+                routeWhileDragging: true
+            }).addTo(map);
+        }
+
+        function getLocationAndSave() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(saveLocation);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function saveLocation(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+
+            // Create WKT string for geometry
+            var wkt = `${longitude} ${latitude}`;
+
+            // Send coordinates to the server
+            fetch('/save-location/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    location: wkt
+                }),
+            })
+         .then(response => response.json())
+         .then(data => {
+                console.log('Location saved:', data);
+                // Add marker to the map
+                addMarker({latitude: latitude, longitude: longitude});
+                // Add marker at destination
+                addMarker({latitude: 57.626559, longitude: 39.893813});
+                addMarker({latitude: 55.739058, longitude: 37.596498});
+                addMarker({latitude: 55.743654, longitude: 37.661177});
+                // Draw route from current location to destination
+                addRoute({latitude: latitude, longitude: longitude}, {latitude: 57.626559, longitude: 39.893813});
+            })
+         .catch((error) => {
+                console.error('Error saving location:', error);
+            });
+        }
+    </script>
+</body>
+</html>

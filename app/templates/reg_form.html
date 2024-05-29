@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Form</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <h1>Registration Form</h1>
+    <form action="/users/" method="post" onsubmit="event.preventDefault(); submitJson();">
+        <label for="lastname">Lastname:</label><br>
+        <input type="text" id="lastname" name="lastname" required><br>
+
+        <label for="firstname">Firstname:</label><br>
+        <input type="text" id="firstname" name="firstname" required><br>
+
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br>
+
+        <label for="role">Role:</label><br>
+        <select id="role" name="role" required>
+            <option value="driver">Driver</option>
+            <option value="passenger">Passenger</option>
+        </select><br>
+
+        <input type="hidden" name="json" id="jsonField"><br>
+        <input type="submit" value="Register">
+    </form>
+
+    <script>
+    function submitJson() {
+        var lastname = document.getElementById('lastname').value;
+        var firstname = document.getElementById('firstname').value;
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+        var role = document.getElementById('role').value;
+
+        var json = JSON.stringify({
+            lastname: lastname,
+            firstname: firstname,
+            username: username,
+            password: password,
+            role: role
+        });
+
+        document.getElementById('jsonField').value = json;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/users/', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                localStorage.setItem('user', JSON.stringify({
+                    lastname: lastname,
+                    firstname: firstname,
+                    username: username,
+                    role: role
+                }));
+
+                // Здесь выполняется редирект на index.html после успешного запроса
+                window.location.href = "http://0.0.0.0:8000/lk";
+            } else if (xhr.readyState === 4 && xhr.status!== 200) {
+                console.error("Ошибка при отправке данных:", xhr.statusText);
+            }
+        };
+        xhr.send(json);
+    }
+    </script>
+</body>
+</html>

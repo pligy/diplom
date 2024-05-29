@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <h1>Welcome, <span id="username"></span></h1>
+    <p>Lastname: <span id="lastname"></span></p>
+    <p>Firstname: <span id="firstname"></span></p>
+    <p>Role: <span id="role"></span></p>
+    <button id="findCompanion">Find a Companion</button>
+
+    <script>
+        // Предполагается, что данные пользователя были сохранены в localStorage после регистрации
+        const user = JSON.parse(localStorage.getItem('user'));
+        document.getElementById('username').innerText = user.username;
+        document.getElementById('lastname').innerText = user.lastname;
+        document.getElementById('firstname').innerText = user.firstname;
+        document.getElementById('role').innerText = user.role;
+
+        document.getElementById('findCompanion').addEventListener('click', () => {
+            window.location.href = "http://0.0.0.0:8000/";
+        });
+    </script>
+</body>
+</html>
